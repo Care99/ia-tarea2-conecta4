@@ -45,7 +45,6 @@ class connect:
           break;
     if(score>=3):
       has_won=1;
-    print("score_horizontal: " + str(score));
     return has_won;
 
   def check_vertical(self,x,y,player):
@@ -75,7 +74,6 @@ class connect:
           break;
     if(score>=3):
       has_won=1;
-    print("score_vertical: " + str(score));
     return has_won;
 
   def check_diagonal_1(self,x,y,player):
@@ -106,7 +104,6 @@ class connect:
           break;
     if(score>=3):
       has_won=1;
-    print("score_diagonal_1: " + str(score));
     return has_won;
 
   def check_diagonal_2(self,x,y,player):
@@ -137,7 +134,6 @@ class connect:
           break;
     if(score>=3):
       has_won=1;
-    print("score_diagonal_2: " + str(score));
     return has_won;
 
   def is_filled(self,x):
@@ -222,7 +218,7 @@ class connect:
       for x in range(self.width):
           if self.is_valid_move(x):
               y = self.place_in(x, player)
-              eval = self.minimax(4, False, -math.inf, math.inf, player)
+              eval = self.minimax(5, False, -math.inf, math.inf, player)
               self.board[y][x] = 0
               self.filled_height[x] -= 1
               self.ammount -= 1
