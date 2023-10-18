@@ -230,6 +230,25 @@ class connect:
                   best_eval = eval
                   best_move = x
       return best_move
+  def ai_move_prune(self, player):
+      best_eval = -math.inf
+      best_move = None
+      alpha = -math.inf
+      beta = math.inf
+      for x in range(self.width):
+          if self.is_valid_move(x):
+              y = self.place_in(x, player)
+              eval = self.minimax(4, False, alpha, beta, player)
+              self.board[y][x] = 0
+              self.filled_height[x] -= 1
+              self.ammount -= 1
+              if eval > best_eval:
+                  best_eval = eval
+                  best_move = x
+              alpha = max(alpha, eval)
+              if beta <= alpha:
+                  break
+      return best_move
 
 #Begin main
 board = connect();
