@@ -176,48 +176,73 @@ class connect:
         score = self.score(x,y,player);
       return score
 
-  def minimax(self, depth, maximizing, alpha, beta, player, x):
-      if depth == 0 or self.ammount == self.max_ammount:
-          return self.evaluate(player,x)
+  def minimax_prune(self, depth, maximizing, alpha, beta, player, x):
+    if depth == 0 or self.ammount == self.max_ammount:
+        return self.evaluate(player,x)
 
-      if maximizing:
-          max_eval = -math.inf
-          for x in range(self.width):
-              if self.is_valid_move(x):
-                  y = self.place_in(x, player)
-                  eval = self.minimax(depth - 1, False, alpha, beta, player, x)
-                  self.board[y][x] = 0
-                  self.filled_height[x] -= 1
-                  self.ammount -= 1
-                  max_eval = max(max_eval, eval)
-                  alpha = max(alpha, eval)
-                  if beta <= alpha:
-                      break
-          return max_eval
-      else:
-          min_eval = math.inf
-          for x in range(self.width):
-              if self.is_valid_move(x):
-                  y = self.place_in(x, player)
-                  eval = self.minimax(depth - 1, True, alpha, beta, player, x)
-                  self.board[y][x] = 0
-                  self.filled_height[x] -= 1
-                  self.ammount -= 1
-                  min_eval = min(min_eval, eval)
-                  beta = min(beta, eval)
-                  if beta <= alpha:
-                      break
-          return min_eval
+    if maximizing:
+        max_eval = -math.inf
+        for x in range(self.width):
+            if self.is_valid_move(x):
+                y = self.place_in(x, player)
+                eval = self.minimax_prune(depth - 1, False, alpha, beta, player, x)
+                self.board[y][x] = 0
+                self.filled_height[x] -= 1
+                self.ammount -= 1
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+        return max_eval
+    else:
+        min_eval = math.inf
+        for x in range(self.width):
+            if self.is_valid_move(x):
+                y = self.place_in(x, player)
+                eval = self.minimax(depth - 1, True, alpha, beta, player, x)
+                self.board[y][x] = 0
+                self.filled_height[x] -= 1
+                self.ammount -= 1
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+        return min_eval
+
+  def minimax(self, depth, maximizing, player, x):
+    if depth == 0 or self.ammount == self.max_ammount:
+        return self.evaluate(player,x)
+
+    if maximizing:
+        max_eval = -math.inf
+        for x in range(self.width):
+            if self.is_valid_move(x):
+                y = self.place_in(x, player)
+                eval = self.minimax(depth - 1, False, player, x)
+                self.board[y][x] = 0
+                self.filled_height[x] -= 1
+                self.ammount -= 1
+                max_eval = max(max_eval, eval)
+        return max_eval
+    else:
+        min_eval = math.inf
+        for x in range(self.width):
+            if self.is_valid_move(x):
+                y = self.place_in(x, player)
+                eval = self.minimax(depth - 1, True, player, x)
+                self.board[y][x] = 0
+                self.filled_height[x] -= 1
+                self.ammount -= 1
+                min_eval = min(min_eval, eval)
+        return min_eval
 
   def ai_move(self, player):
       best_eval = -math.inf
       best_move = None
-      alpha = -math.inf
-      beta = math.inf
       for x in range(self.width):
           if self.is_valid_move(x):
               y = self.place_in(x, player)
-              eval = self.minimax(9, True, alpha, beta, player,x)
+              eval = self.minimax(6, True, player,x)
               self.board[y][x] = 0
               self.filled_height[x] -= 1
               self.ammount -= 1
@@ -233,7 +258,7 @@ class connect:
       for x in range(self.width):
           if self.is_valid_move(x):
               y = self.place_in(x, player)
-              eval = self.minimax(1, True, alpha, beta, player,x)
+              eval = self.minimax_prune(1, True, alpha, beta, player,x)
               self.board[y][x] = 0
               self.filled_height[x] -= 1
               self.ammount -= 1
