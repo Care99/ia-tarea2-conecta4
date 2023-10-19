@@ -22,7 +22,6 @@ class connect:
     i=y;
     j=x;
     score=0;
-    has_won=0;
     #Check left
     for j in range(x-1,x-4,-1):
         if(j>=0):
@@ -43,15 +42,12 @@ class connect:
             break;
         else:
           break;
-    if(score>=3):
-      has_won=1;
-    return has_won;
+    return score;
 
   def check_vertical(self,x,y,player):
     i=y;
     j=x;
     score=0;
-    has_won=0;
     #Check up
     for i in range(y-1,y-4,-1):
         if(i>=0):
@@ -72,16 +68,13 @@ class connect:
             break;
         else:
           break;
-    if(score>=3):
-      has_won=1;
-    return has_won;
+    return score;
 
   def check_diagonal_1(self,x,y,player):
     i=y;
     j=x;
     iteration=0
     score=0;
-    has_won=0;
     #Check north west
     for iteration in range(1,4):
         if(i-iteration>=0 and j-iteration>=0):
@@ -102,16 +95,13 @@ class connect:
             break;
         else:
           break;
-    if(score>=3):
-      has_won=1;
-    return has_won;
+    return score;
 
   def check_diagonal_2(self,x,y,player):
     i=y;
     j=x;
     iteration=0;
     score=0;
-    has_won=0;
     #Check north east
     for iteration in range(1,4):
         if(i-iteration>=0 and j+iteration<=6):
@@ -132,9 +122,7 @@ class connect:
             break;
         else:
           break;
-    if(score>=3):
-      has_won=1;
-    return has_won;
+    return score;
 
   def is_filled(self,x):
     y = self.filled_height[x];
@@ -158,10 +146,18 @@ class connect:
     score_vertical = self.check_vertical(x,y,player);
     score_diagonal_1 = self.check_diagonal_1(x,y,player);
     score_diagonal_2 = self.check_diagonal_2(x,y,player);
-    if( score_horizontal + score_vertical + score_diagonal_1 + score_diagonal_2 > 0 ):
+    if( score_horizontal >= 3 or score_vertical >= 3 or score_diagonal_1 >= 3 or score_diagonal_2 >= 3 ):
       victory = 1;
     return victory;
 
+  def score(self,x,y,player):
+    score = 0;
+    score_horizontal = self.check_horizontal(x,y,player);
+    score_vertical = self.check_vertical(x,y,player);
+    score_diagonal_1 = self.check_diagonal_1(x,y,player);
+    score_diagonal_2 = self.check_diagonal_2(x,y,player);
+    score = score_horizontal + score_vertical + score_diagonal_1 + score_diagonal_2
+    return score;
   def print_board(self):
     i=0;
     for i in range(self.height):
@@ -172,23 +168,24 @@ class connect:
   def is_valid_move(self, x):
       return not self.is_filled(x)
 
-  def evaluate(self, player):
+  def evaluate(self, player,x):
+      y = self.filled_height[x]-1;
       if self.check_victory(x, y, player):
-          return 100000  # AI wins
-      if self.check_victory(x, y, player):
-          return -100000  # Opponent wins
-      return 0
+        score = 20  # AI wins
+      else:
+        score = self.score(x,y,player);
+      return score
 
-  def minimax(self, depth, maximizing, alpha, beta, player):
+  def minimax(self, depth, maximizing, alpha, beta, player, x):
       if depth == 0 or self.ammount == self.max_ammount:
-          return self.evaluate(player)
+          return self.evaluate(player,x)
 
       if maximizing:
           max_eval = -math.inf
           for x in range(self.width):
               if self.is_valid_move(x):
                   y = self.place_in(x, player)
-                  eval = self.minimax(depth - 1, False, alpha, beta, player)
+                  eval = self.minimax(depth - 1, False, alpha, beta, player, x)
                   self.board[y][x] = 0
                   self.filled_height[x] -= 1
                   self.ammount -= 1
@@ -202,7 +199,7 @@ class connect:
           for x in range(self.width):
               if self.is_valid_move(x):
                   y = self.place_in(x, player)
-                  eval = self.minimax(depth - 1, True, alpha, beta, player)
+                  eval = self.minimax(depth - 1, True, alpha, beta, player, x)
                   self.board[y][x] = 0
                   self.filled_height[x] -= 1
                   self.ammount -= 1
@@ -215,10 +212,12 @@ class connect:
   def ai_move(self, player):
       best_eval = -math.inf
       best_move = None
+      alpha = -math.inf
+      beta = math.inf
       for x in range(self.width):
           if self.is_valid_move(x):
               y = self.place_in(x, player)
-              eval = self.minimax(5, False, -math.inf, math.inf, player)
+              eval = self.minimax(9, True, alpha, beta, player,x)
               self.board[y][x] = 0
               self.filled_height[x] -= 1
               self.ammount -= 1
@@ -234,7 +233,7 @@ class connect:
       for x in range(self.width):
           if self.is_valid_move(x):
               y = self.place_in(x, player)
-              eval = self.minimax(4, False, alpha, beta, player)
+              eval = self.minimax(1, True, alpha, beta, player,x)
               self.board[y][x] = 0
               self.filled_height[x] -= 1
               self.ammount -= 1
@@ -256,20 +255,17 @@ y=0;
 
 while( board.ammount < board.max_ammount ):
   turn = (turn+1)%2;
-  x = (int)(random.random()*1000) % 7;
-
-  while board.is_filled(x) == 1:
-    x = (int)(random.random()*1000) % 7;
-
   if( turn == 0 ):
-    y=board.place_in(board.ai_move(player1),player1);
+    x = board.ai_move(player1)
+    y = board.place_in(x,player1);
     print("Turn number: " + str(board.ammount) + "\tx: " + str(x) + "\ty: " + str(y));
     board.print_board();
     if(board.check_victory(x,y,player1)):
       print("Player 1 has won!");
       break;
   else:
-    y=board.place_in(x,player2);
+    x = board.ai_move_prune(player2);
+    y = board.place_in(x,player2);
     print("Turn number: " + str(board.ammount) + "\tx: " + str(x) + "\ty: " + str(y));
     board.print_board();
     if(board.check_victory(x,y,player2)):
