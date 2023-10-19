@@ -6,6 +6,9 @@
 ## Acerca de
 
 Tarea 2 de Inteligencia Artificial
+Miembros:
+- Cesar Rodas
+- Enrique Sanchez
 
 ## Descripcion
 
